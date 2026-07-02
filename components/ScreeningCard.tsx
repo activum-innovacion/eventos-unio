@@ -1,0 +1,99 @@
+"use client";
+
+import { useState } from "react";
+import type { Screening } from "@/lib/types";
+import { Poster } from "./Poster";
+import { ClockIcon, PinIcon } from "./icons";
+import { dateParts, formatDuration, relativeLabel } from "@/lib/format";
+
+export function ScreeningCard({
+  screening,
+  now,
+}: {
+  screening: Screening;
+  now: Date;
+}) {
+  const [open, setOpen] = useState(false);
+  const { weekday, day, month } = dateParts(screening.date);
+  const rel = relativeLabel(screening.date, now);
+  const isPast = rel === "Ya proyectada" || rel === "Ayer";
+
+  const badgeClass = isPast
+    ? "bg-cream text-muted"
+    : rel === "Hoy"
+      ? "bg-indigo text-white"
+      : "bg-indigo/10 text-indigo-ink";
+
+  return (
+    <button
+      type="button"
+      onClick={() => setOpen((o) => !o)}
+      aria-expanded={open}
+      className={`w-full rounded-2xl border border-line bg-card p-3 text-left shadow-sm transition-shadow hover:shadow-md ${
+        isPast ? "opacity-70" : ""
+      }`}
+    >
+      <div className="flex gap-3">
+        <div className="flex w-12 shrink-0 flex-col items-center justify-center rounded-xl bg-cream py-2 text-center">
+          <span className="text-[0.62rem] font-bold uppercase tracking-wide text-indigo">
+            {weekday}
+          </span>
+          <span className="text-xl font-bold leading-none text-ink">{day}</span>
+          <span className="text-[0.62rem] uppercase tracking-wide text-muted">
+            {month}
+          </span>
+        </div>
+
+        <Poster
+          poster={screening.poster}
+          imageUrl={screening.imageUrl}
+          title={screening.title}
+          className="h-[4.5rem] w-14"
+          size="sm"
+        />
+
+        <div className="min-w-0 flex-1">
+          <div className="flex items-start justify-between gap-2">
+            <h3 className="truncate text-base font-bold text-ink">
+              {screening.title}
+            </h3>
+            <span
+              className={`shrink-0 rounded-full px-2 py-0.5 text-[0.62rem] font-semibold ${badgeClass}`}
+            >
+              {rel}
+            </span>
+          </div>
+          <p className="mt-0.5 truncate text-xs text-muted">
+            {screening.genre} · {screening.year}
+          </p>
+          <div className="mt-2 flex flex-wrap items-center gap-x-3 gap-y-1 text-xs">
+            <span className="inline-flex items-center gap-1 font-bold text-ink">
+              <ClockIcon className="h-3.5 w-3.5 text-indigo" />
+              {screening.time}
+            </span>
+            <span className="text-muted">{formatDuration(screening.duration)}</span>
+            <span className="rounded border border-line px-1.5 py-px text-[0.6rem] text-muted">
+              {screening.rating}
+            </span>
+          </div>
+        </div>
+      </div>
+
+      <div
+        className={`grid transition-all duration-300 ${
+          open ? "mt-3 grid-rows-[1fr] opacity-100" : "grid-rows-[0fr] opacity-0"
+        }`}
+      >
+        <div className="overflow-hidden">
+          <p className="text-sm leading-relaxed text-ink-soft">
+            {screening.synopsis}
+          </p>
+          <p className="mt-2 inline-flex items-center gap-1 text-xs text-muted">
+            <PinIcon className="h-3.5 w-3.5 text-indigo" />
+            {screening.location}
+          </p>
+        </div>
+      </div>
+    </button>
+  );
+}
