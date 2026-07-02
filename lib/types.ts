@@ -55,3 +55,33 @@ export type DB = {
   /** candidateId -> list of deviceIds that voted for it */
   votes: Record<string, string[]>;
 };
+
+// --- Entradas de la capa de datos (compartidas por los backends) ---
+
+export type ScreeningInput = {
+  title: string;
+  year: number;
+  genre: string;
+  duration: number;
+  rating: string;
+  synopsis: string;
+  date: string;
+  time: string;
+  location: string;
+  imageUrl?: string;
+};
+
+export type NewCandidateInput = {
+  title: string;
+  genre: string;
+  synopsis: string;
+  year?: number;
+  proposedBy?: string;
+  imageUrl?: string;
+};
+
+export type CandidatePatch = Partial<
+  Pick<Candidate, "title" | "genre" | "synopsis" | "year" | "imageUrl">
+>;
+
+export type VoteResult = { id: string; votes: number; hasVoted: boolean };

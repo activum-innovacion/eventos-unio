@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { promises as fs } from "fs";
 import path from "path";
 import crypto from "crypto";
+import { put } from "@vercel/blob";
 import { isAdmin } from "@/lib/auth";
 
 export const dynamic = "force-dynamic";
@@ -48,19 +49,35 @@ export async function POST(req: NextRequest) {
     );
   }
 
-  const bytes = Buffer.from(await file.arrayBuffer());
   const name = `${Date.now()}-${crypto.randomBytes(4).toString("hex")}.${ext}`;
-  const dir = path.join(process.cwd(), "public", "uploads");
 
+  // 1) Producción: Vercel Blob (si está configurado el token).
+  if (process.env.BLOB_READ_WRITE_TOKEN) {
+    try {
+      const blob = await put(`carteles/${name}`, file, {
+        access: "public",
+        contentType: file.type,
+      });
+      return NextResponse.json({ url: blob.url }, { status: 201 });
+    } catch {
+      return NextResponse.json(
+        { error: "No se pudo subir la imagen al almacenamiento." },
+        { status: 502 }
+      );
+    }
+  }
+
+  // 2) Local: guardar en public/uploads.
+  const bytes = Buffer.from(await file.arrayBuffer());
+  const dir = path.join(process.cwd(), "public", "uploads");
   try {
     await fs.mkdir(dir, { recursive: true });
     await fs.writeFile(path.join(dir, name), bytes);
   } catch {
-    // Sistema de ficheros de solo lectura (p. ej. Vercel).
     return NextResponse.json(
       {
         error:
-          "No se pudo guardar la imagen: este entorno no permite escribir en disco. Para subir imágenes en producción hay que conectar un almacenamiento (Vercel Blob / Supabase Storage).",
+          "No se pudo guardar la imagen: este entorno no permite escribir en disco y no hay almacenamiento configurado. Añade Vercel Blob (variable BLOB_READ_WRITE_TOKEN).",
       },
       { status: 501 }
     );
