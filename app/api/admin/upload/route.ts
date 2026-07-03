@@ -59,9 +59,11 @@ export async function POST(req: NextRequest) {
         contentType: file.type,
       });
       return NextResponse.json({ url: blob.url }, { status: 201 });
-    } catch {
+    } catch (e) {
+      console.error("[upload] Vercel Blob error:", e);
+      const detail = e instanceof Error ? e.message : "error desconocido";
       return NextResponse.json(
-        { error: "No se pudo subir la imagen al almacenamiento." },
+        { error: `No se pudo subir a Blob: ${detail}` },
         { status: 502 }
       );
     }
