@@ -1,10 +1,9 @@
 "use client";
 
-import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
 import type { CandidateView } from "@/lib/types";
 import { CandidateCard } from "@/components/CandidateCard";
-import { PlusCircleIcon, TrophyIcon } from "@/components/icons";
+import { TrophyIcon } from "@/components/icons";
 import { getDeviceId } from "@/lib/deviceId";
 
 type VoteResp = { id: string; votes: number; hasVoted: boolean };
@@ -121,7 +120,7 @@ export default function VotacionesPage() {
 
       {candidates && candidates.length === 0 && (
         <p className="rounded-xl border border-line bg-card p-6 text-center text-sm text-muted">
-          Todavía no hay películas para votar. ¡Sé el primero en proponer una!
+          Todavía no hay películas para votar. ¡Vuelve pronto!
         </p>
       )}
 
@@ -144,13 +143,6 @@ export default function VotacionesPage() {
         </div>
       )}
 
-      <Link
-        href="/proponer"
-        className="flex items-center justify-center gap-2 rounded-xl border border-dashed border-indigo/40 bg-indigo/[0.04] py-3.5 text-sm font-semibold text-indigo transition-colors hover:bg-indigo/10"
-      >
-        <PlusCircleIcon className="h-5 w-5" />
-        ¿No está la tuya? Propón una película
-      </Link>
     </div>
   );
 }

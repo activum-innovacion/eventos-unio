@@ -2,13 +2,12 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { FilmIcon, HeartIcon, HomeIcon, PlusCircleIcon } from "./icons";
+import { FilmIcon, HeartIcon, HomeIcon } from "./icons";
 
 const items = [
   { href: "/", label: "Inicio", Icon: HomeIcon },
   { href: "/cartelera", label: "Cartelera", Icon: FilmIcon },
   { href: "/votaciones", label: "Votaciones", Icon: HeartIcon },
-  { href: "/proponer", label: "Proponer", Icon: PlusCircleIcon },
 ];
 
 export function BottomNav() {

@@ -10,7 +10,7 @@ import { formatDateLong } from "@/lib/format";
 import { ScreeningForm } from "./ScreeningForm";
 import { CandidateForm } from "./CandidateForm";
 
-type Tab = "cartelera" | "propuestas";
+type Tab = "cartelera" | "votaciones";
 
 const sortScreenings = (list: Screening[]) =>
   [...list].sort((a, b) =>
@@ -61,7 +61,7 @@ export function AdminDashboard() {
     }
   };
 
-  // --- Screenings ---
+  // --- Cartelera ---
   function onScreeningSaved(s: Screening) {
     setScreenings((prev) => {
       const base = prev ?? [];
@@ -85,7 +85,7 @@ export function AdminDashboard() {
     });
   }
 
-  // --- Candidates ---
+  // --- Votaciones (películas votables, definidas por el admin) ---
   function onCandidateSaved(c: CandidateView) {
     setCandidates((prev) => {
       const base = prev ?? [];
@@ -96,25 +96,8 @@ export function AdminDashboard() {
     setEditingCandidate(null);
   }
 
-  function approve(c: CandidateView) {
-    withBusy(c.id, async () => {
-      const res = await fetch(`/api/admin/candidates/${c.id}/approve`, {
-        method: "POST",
-      });
-      if (res.ok) {
-        const d = await res.json();
-        setCandidates((prev) =>
-          (prev ?? []).map((x) => (x.id === c.id ? d.candidate : x))
-        );
-      }
-    });
-  }
-
-  function removeCandidate(c: CandidateView, isProposal: boolean) {
-    const msg = isProposal
-      ? `¿Rechazar la propuesta “${c.title}”?`
-      : `¿Eliminar “${c.title}” de las votaciones?`;
-    if (!confirm(msg)) return;
+  function removeCandidate(c: CandidateView) {
+    if (!confirm(`¿Eliminar “${c.title}” de las votaciones?`)) return;
     withBusy(c.id, async () => {
       const res = await fetch(`/api/admin/candidates/${c.id}`, {
         method: "DELETE",
@@ -123,9 +106,6 @@ export function AdminDashboard() {
         setCandidates((prev) => (prev ?? []).filter((x) => x.id !== c.id));
     });
   }
-
-  const pending = (candidates ?? []).filter((c) => c.status === "pending");
-  const approved = (candidates ?? []).filter((c) => c.status === "approved");
 
   return (
     <div>
@@ -160,10 +140,10 @@ export function AdminDashboard() {
           Cartelera {screenings ? `(${screenings.length})` : ""}
         </TabButton>
         <TabButton
-          active={tab === "propuestas"}
-          onClick={() => setTab("propuestas")}
+          active={tab === "votaciones"}
+          onClick={() => setTab("votaciones")}
         >
-          Propuestas {pending.length > 0 ? `(${pending.length})` : ""}
+          Votaciones {candidates ? `(${candidates.length})` : ""}
         </TabButton>
       </div>
 
@@ -230,145 +210,76 @@ export function AdminDashboard() {
         </div>
       )}
 
-      {/* PROPUESTAS */}
-      {tab === "propuestas" && (
-        <div className="space-y-6">
-          {/* Pendientes */}
-          <section className="space-y-2.5">
-            <h2 className="text-xs font-bold uppercase tracking-[0.14em] text-muted">
-              Pendientes de aprobar
-            </h2>
-            {candidates === null ? (
-              <SkeletonList />
-            ) : pending.length === 0 ? (
-              <Empty>No hay propuestas pendientes. 🎉</Empty>
-            ) : (
-              <ul className="space-y-2.5">
-                {pending.map((c) => (
+      {/* VOTACIONES */}
+      {tab === "votaciones" && (
+        <div className="space-y-4">
+          <p className="text-xs leading-relaxed text-muted">
+            Añade aquí las películas que los residentes podrán votar. Las más
+            votadas te ayudan a decidir la programación.
+          </p>
+
+          {!addingCandidate && !editingCandidate && (
+            <button
+              onClick={() => setAddingCandidate(true)}
+              className="w-full rounded-xl border border-dashed border-indigo/40 bg-indigo/[0.04] py-3 text-sm font-bold text-indigo hover:bg-indigo/10"
+            >
+              + Añadir película
+            </button>
+          )}
+
+          {(addingCandidate || editingCandidate) && (
+            <CandidateForm
+              initial={editingCandidate ?? undefined}
+              onSaved={onCandidateSaved}
+              onCancel={() => {
+                setAddingCandidate(false);
+                setEditingCandidate(null);
+              }}
+            />
+          )}
+
+          {candidates === null ? (
+            <SkeletonList />
+          ) : candidates.length === 0 ? (
+            <Empty>Aún no hay películas para votar. Añade la primera.</Empty>
+          ) : (
+            <ul className="space-y-2.5">
+              {[...candidates]
+                .sort((a, b) => b.votes - a.votes)
+                .map((c) => (
                   <li
                     key={c.id}
-                    className="rounded-xl border border-tan/40 bg-tan/[0.06] p-3 shadow-sm"
+                    className="flex items-center gap-3 rounded-xl border border-line bg-card p-2.5 shadow-sm"
                   >
-                    <div className="flex gap-3">
-                      <Poster
-                        poster={c.poster}
-                        imageUrl={c.imageUrl}
-                        title={c.title}
-                        className="h-16 w-12"
-                        size="sm"
-                      />
-                      <div className="min-w-0 flex-1">
-                        <p className="font-bold text-ink">{c.title}</p>
-                        <p className="text-xs text-muted">
-                          {c.genre}
-                          {c.year ? ` · ${c.year}` : ""}
-                          {c.proposedBy ? ` · por ${c.proposedBy}` : ""}
-                        </p>
-                        {c.synopsis && (
-                          <p className="mt-1 line-clamp-2 text-xs text-ink-soft">
-                            {c.synopsis}
-                          </p>
-                        )}
-                      </div>
+                    <Poster
+                      poster={c.poster}
+                      imageUrl={c.imageUrl}
+                      title={c.title}
+                      className="h-16 w-12"
+                      size="sm"
+                    />
+                    <div className="min-w-0 flex-1">
+                      <p className="truncate font-bold text-ink">{c.title}</p>
+                      <p className="text-xs text-muted">
+                        {c.genre}
+                        {c.year ? ` · ${c.year}` : ""}
+                      </p>
+                      <p className="text-xs font-semibold text-indigo">
+                        {c.votes} {c.votes === 1 ? "voto" : "votos"}
+                      </p>
                     </div>
-                    <div className="mt-2.5 flex flex-wrap gap-2">
-                      <button
-                        onClick={() => approve(c)}
-                        disabled={busy.has(c.id)}
-                        className="rounded-lg bg-indigo px-3 py-1.5 text-xs font-bold text-white active:scale-95 disabled:opacity-50"
-                      >
-                        ✓ Aprobar
-                      </button>
-                      <button
-                        onClick={() => setEditingCandidate(c)}
-                        className="rounded-lg border border-line px-3 py-1.5 text-xs font-semibold text-ink"
-                      >
-                        Editar
-                      </button>
-                      <button
-                        onClick={() => removeCandidate(c, true)}
-                        disabled={busy.has(c.id)}
-                        className="rounded-lg border border-line px-3 py-1.5 text-xs font-semibold text-muted hover:border-coral hover:text-coral disabled:opacity-50"
-                      >
-                        Rechazar
-                      </button>
-                    </div>
+                    <RowActions
+                      onEdit={() => {
+                        setAddingCandidate(false);
+                        setEditingCandidate(c);
+                      }}
+                      onDelete={() => removeCandidate(c)}
+                      busy={busy.has(c.id)}
+                    />
                   </li>
                 ))}
-              </ul>
-            )}
-          </section>
-
-          {/* En votación */}
-          <section className="space-y-2.5">
-            <div className="flex items-center justify-between">
-              <h2 className="text-xs font-bold uppercase tracking-[0.14em] text-muted">
-                En votación
-              </h2>
-              {!addingCandidate && !editingCandidate && (
-                <button
-                  onClick={() => setAddingCandidate(true)}
-                  className="text-xs font-bold text-indigo hover:underline"
-                >
-                  + Añadir
-                </button>
-              )}
-            </div>
-
-            {(addingCandidate || editingCandidate) && (
-              <CandidateForm
-                initial={editingCandidate ?? undefined}
-                onSaved={onCandidateSaved}
-                onCancel={() => {
-                  setAddingCandidate(false);
-                  setEditingCandidate(null);
-                }}
-              />
-            )}
-
-            {candidates === null ? (
-              <SkeletonList />
-            ) : approved.length === 0 ? (
-              <Empty>No hay películas en votación.</Empty>
-            ) : (
-              <ul className="space-y-2.5">
-                {approved
-                  .sort((a, b) => b.votes - a.votes)
-                  .map((c) => (
-                    <li
-                      key={c.id}
-                      className="flex items-center gap-3 rounded-xl border border-line bg-card p-2.5 shadow-sm"
-                    >
-                      <Poster
-                        poster={c.poster}
-                        imageUrl={c.imageUrl}
-                        title={c.title}
-                        className="h-16 w-12"
-                        size="sm"
-                      />
-                      <div className="min-w-0 flex-1">
-                        <p className="truncate font-bold text-ink">{c.title}</p>
-                        <p className="text-xs text-muted">
-                          {c.genre}
-                          {c.year ? ` · ${c.year}` : ""}
-                        </p>
-                        <p className="text-xs font-semibold text-indigo">
-                          {c.votes} {c.votes === 1 ? "voto" : "votos"}
-                        </p>
-                      </div>
-                      <RowActions
-                        onEdit={() => {
-                          setAddingCandidate(false);
-                          setEditingCandidate(c);
-                        }}
-                        onDelete={() => removeCandidate(c, false)}
-                        busy={busy.has(c.id)}
-                      />
-                    </li>
-                  ))}
-              </ul>
-            )}
-          </section>
+            </ul>
+          )}
         </div>
       )}
     </div>
