@@ -9,7 +9,7 @@ import {
   parseLocalDate,
   relativeLabel,
 } from "@/lib/format";
-import { PENDING_POSTER, Poster } from "./Poster";
+import { Poster } from "./Poster";
 import { ClockIcon, PinIcon } from "./icons";
 
 const WEEKDAYS = ["L", "M", "X", "J", "V", "S", "D"];
@@ -198,8 +198,9 @@ export function ScreeningCalendar({
 
             <div className="flex gap-4">
               <Poster
-                poster={openPending ? PENDING_POSTER : openScreening.poster}
-                imageUrl={openPending ? undefined : openScreening.imageUrl}
+                poster={openScreening.poster}
+                imageUrl={openScreening.imageUrl}
+                pending={openPending}
                 title={openTitle}
                 className="h-40 w-28 shrink-0 shadow-sm"
                 size="lg"

@@ -5,7 +5,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import type { CandidateView, Screening } from "@/lib/types";
-import { PENDING_POSTER, Poster } from "@/components/Poster";
+import { Poster } from "@/components/Poster";
 import { formatDateLong } from "@/lib/format";
 import { ScreeningForm } from "./ScreeningForm";
 import { CandidateForm } from "./CandidateForm";
@@ -182,8 +182,9 @@ export function AdminDashboard() {
                   className="flex items-center gap-3 rounded-xl border border-line bg-card p-2.5 shadow-sm"
                 >
                   <Poster
-                    poster={s.pendingVote ? PENDING_POSTER : s.poster}
-                    imageUrl={s.pendingVote ? undefined : s.imageUrl}
+                    poster={s.poster}
+                    imageUrl={s.imageUrl}
+                    pending={!!s.pendingVote}
                     title={s.title}
                     className="h-16 w-12"
                     size="sm"

@@ -1,6 +1,6 @@
 import Link from "next/link";
 import type { Screening } from "@/lib/types";
-import { PENDING_POSTER, Poster } from "./Poster";
+import { Poster } from "./Poster";
 import { ClockIcon, PinIcon } from "./icons";
 import { daysUntil, formatDateLong, formatDuration, relativeLabel } from "@/lib/format";
 
@@ -35,8 +35,9 @@ export function NextUpHero({
 
       <div className="flex gap-4 p-4">
         <Poster
-          poster={isPending ? PENDING_POSTER : screening.poster}
-          imageUrl={isPending ? undefined : screening.imageUrl}
+          poster={screening.poster}
+          imageUrl={screening.imageUrl}
+          pending={isPending}
           title={title}
           className="h-36 w-24 shadow-sm"
           size="lg"

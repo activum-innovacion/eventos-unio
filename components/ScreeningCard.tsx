@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import type { Screening } from "@/lib/types";
-import { PENDING_POSTER, Poster } from "./Poster";
+import { Poster } from "./Poster";
 import { ClockIcon, PinIcon } from "./icons";
 import { dateParts, formatDuration, relativeLabel } from "@/lib/format";
 
@@ -49,8 +49,9 @@ export function ScreeningCard({
         </div>
 
         <Poster
-          poster={isPending ? PENDING_POSTER : screening.poster}
-          imageUrl={isPending ? undefined : screening.imageUrl}
+          poster={screening.poster}
+          imageUrl={screening.imageUrl}
+          pending={isPending}
           title={title}
           className="h-[4.5rem] w-14"
           size="sm"
