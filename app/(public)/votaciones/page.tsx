@@ -1,10 +1,13 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import type { CandidateView } from "@/lib/types";
 import { CandidateCard } from "@/components/CandidateCard";
 import { TrophyIcon } from "@/components/icons";
 import { getDeviceId } from "@/lib/deviceId";
+import { useScreenings } from "@/lib/useScreenings";
+import { votingStatus } from "@/lib/voting";
+import { formatDateLong } from "@/lib/format";
 
 type VoteResp = { id: string; votes: number; hasVoted: boolean };
 
@@ -13,6 +16,13 @@ export default function VotacionesPage() {
   const [error, setError] = useState<string | null>(null);
   const [pending, setPending] = useState<Set<string>>(new Set());
   const deviceId = useRef<string>("");
+
+  const { screenings, now } = useScreenings();
+  const status = useMemo(
+    () => (screenings ? votingStatus(screenings, now) : null),
+    [screenings, now]
+  );
+  const votingClosed = status ? !status.open : false;
 
   useEffect(() => {
     deviceId.current = getDeviceId();
@@ -27,7 +37,7 @@ export default function VotacionesPage() {
   }, []);
 
   async function handleVote(id: string) {
-    if (pending.has(id)) return;
+    if (pending.has(id) || votingClosed) return;
     setCandidates((prev) =>
       prev
         ? prev.map((c) =>
@@ -97,10 +107,37 @@ export default function VotacionesPage() {
           <h1 className="brand-heading text-2xl text-ink">Votaciones</h1>
         </div>
         <p className="mt-1.5 text-sm leading-relaxed text-muted">
-          Las películas más votadas se proyectarán en las sesiones de agosto.
-          Vota todas las que quieras — un voto por peli y dispositivo.
+          Vota tus películas favoritas — un voto por peli y dispositivo. La
+          votación se cierra{" "}
+          <span className="font-semibold text-ink">3 días antes</span> de cada
+          sesión pendiente de votación.
         </p>
       </section>
+
+      {status?.hasPending &&
+        (status.open ? (
+          <div className="rounded-xl border border-indigo/25 bg-indigo/[0.06] p-3.5 text-sm leading-relaxed text-ink-soft">
+            🗳️ Puedes votar hasta el{" "}
+            <span className="font-bold text-indigo">
+              {formatDateLong(status.closeDate!)}
+            </span>
+            . Después se cierra la votación para la sesión del{" "}
+            <span className="font-semibold text-ink">
+              {formatDateLong(status.sessionDate!)}
+            </span>
+            .
+          </div>
+        ) : (
+          <div className="rounded-xl border border-line bg-cream p-3.5 text-sm leading-relaxed text-ink-soft">
+            🔒{" "}
+            <span className="font-bold text-ink">Votación cerrada</span> para la
+            sesión del{" "}
+            <span className="font-semibold text-ink">
+              {formatDateLong(status.sessionDate!)}
+            </span>
+            . La película se decide con los votos ya recibidos.
+          </div>
+        ))}
 
       {candidates && (
         <div className="flex gap-2.5 text-center">
@@ -136,13 +173,13 @@ export default function VotacionesPage() {
                 candidate={c}
                 rank={i + 1}
                 pending={pending.has(c.id)}
+                votingClosed={votingClosed}
                 onVote={handleVote}
               />
             </div>
           ))}
         </div>
       )}
-
     </div>
   );
 }

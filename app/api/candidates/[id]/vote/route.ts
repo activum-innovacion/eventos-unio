@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
-import { toggleVote } from "@/lib/store";
+import { getScreenings, toggleVote } from "@/lib/store";
+import { votingStatus } from "@/lib/voting";
 
 export const dynamic = "force-dynamic";
 
@@ -21,6 +22,14 @@ export async function POST(
     return NextResponse.json(
       { error: "Falta el identificador de dispositivo." },
       { status: 400 }
+    );
+  }
+
+  // La votación se cierra 3 días antes de la próxima sesión pendiente.
+  if (!votingStatus(await getScreenings()).open) {
+    return NextResponse.json(
+      { error: "La votación está cerrada." },
+      { status: 403 }
     );
   }
 

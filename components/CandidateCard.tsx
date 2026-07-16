@@ -9,11 +9,13 @@ export function CandidateCard({
   candidate,
   rank,
   pending,
+  votingClosed,
   onVote,
 }: {
   candidate: CandidateView;
   rank: number;
   pending: boolean;
+  votingClosed?: boolean;
   onVote: (id: string) => void;
 }) {
   const [expanded, setExpanded] = useState(false);
@@ -65,14 +67,16 @@ export function CandidateCard({
         <button
           type="button"
           onClick={() => onVote(candidate.id)}
-          disabled={pending}
+          disabled={pending || votingClosed}
           aria-pressed={candidate.hasVoted}
           aria-label={
-            candidate.hasVoted
-              ? `Quitar voto de ${candidate.title}`
-              : `Votar por ${candidate.title}`
+            votingClosed
+              ? "Votación cerrada"
+              : candidate.hasVoted
+                ? `Quitar voto de ${candidate.title}`
+                : `Votar por ${candidate.title}`
           }
-          className={`flex w-14 shrink-0 flex-col items-center justify-center gap-1 rounded-xl border py-2 transition-all active:scale-95 disabled:opacity-60 ${
+          className={`flex w-14 shrink-0 flex-col items-center justify-center gap-1 rounded-xl border py-2 transition-all active:scale-95 disabled:cursor-not-allowed disabled:opacity-60 ${
             candidate.hasVoted
               ? "border-indigo bg-indigo text-white"
               : "border-line bg-card text-muted hover:border-indigo hover:text-indigo"
