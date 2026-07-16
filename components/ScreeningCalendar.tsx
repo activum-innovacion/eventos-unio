@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
 import type { Screening } from "@/lib/types";
 import {
@@ -8,7 +9,7 @@ import {
   parseLocalDate,
   relativeLabel,
 } from "@/lib/format";
-import { Poster } from "./Poster";
+import { PENDING_POSTER, Poster } from "./Poster";
 import { ClockIcon, PinIcon } from "./icons";
 
 const WEEKDAYS = ["L", "M", "X", "J", "V", "S", "D"];
@@ -46,6 +47,12 @@ export function ScreeningCalendar({
   // Fecha con el modal abierto (null = cerrado)
   const [openDate, setOpenDate] = useState<string | null>(null);
   const openScreening = openDate ? byDate.get(openDate) : undefined;
+  const openPending = !!openScreening?.pendingVote;
+  const openTitle = openScreening
+    ? openPending
+      ? openScreening.title?.trim() || "Pendiente de votación"
+      : openScreening.title
+    : "";
 
   // Cerrar con Escape + bloquear scroll del fondo mientras está abierto
   useEffect(() => {
@@ -119,6 +126,7 @@ export function ScreeningCalendar({
           if (day === null) return <div key={`e${i}`} />;
           const k = keyOf(view.year, view.month, day);
           const has = byDate.has(k);
+          const pending = has && !!byDate.get(k)?.pendingVote;
           const isToday = k === todayKey;
           const isNext = upcoming?.date === k;
           const isPast = k < todayKey;
@@ -142,7 +150,11 @@ export function ScreeningCalendar({
             >
               {day}
               {has && !isNext && (
-                <span className="absolute bottom-1 h-1 w-1 rounded-full bg-indigo" />
+                <span
+                  className={`absolute bottom-1 h-1 w-1 rounded-full ${
+                    pending ? "bg-tan" : "bg-indigo"
+                  }`}
+                />
               )}
             </button>
           );
@@ -158,7 +170,7 @@ export function ScreeningCalendar({
         <div
           role="dialog"
           aria-modal="true"
-          aria-label={`Sesión de ${openScreening.title}`}
+          aria-label={`Sesión: ${openTitle}`}
           onClick={() => setOpenDate(null)}
           className="fixed inset-0 z-50 flex items-center justify-center bg-ink/50 p-4 backdrop-blur-sm"
         >
@@ -186,9 +198,9 @@ export function ScreeningCalendar({
 
             <div className="flex gap-4">
               <Poster
-                poster={openScreening.poster}
-                imageUrl={openScreening.imageUrl}
-                title={openScreening.title}
+                poster={openPending ? PENDING_POSTER : openScreening.poster}
+                imageUrl={openPending ? undefined : openScreening.imageUrl}
+                title={openTitle}
                 className="h-40 w-28 shrink-0 shadow-sm"
                 size="lg"
               />
@@ -197,12 +209,18 @@ export function ScreeningCalendar({
                   {relativeLabel(openScreening.date, now)}
                 </span>
                 <h3 className="text-lg font-extrabold leading-tight text-ink">
-                  {openScreening.title}
+                  {openTitle}
                 </h3>
-                <p className="mt-0.5 text-xs text-muted">
-                  {openScreening.genre} · {openScreening.year} ·{" "}
-                  {formatDuration(openScreening.duration)}
-                </p>
+                {openPending ? (
+                  <p className="mt-0.5 text-xs font-semibold text-indigo">
+                    🗳️ Se decide por votación
+                  </p>
+                ) : (
+                  <p className="mt-0.5 text-xs text-muted">
+                    {openScreening.genre} · {openScreening.year} ·{" "}
+                    {formatDuration(openScreening.duration)}
+                  </p>
+                )}
                 <p className="mt-2 text-sm font-semibold text-ink">
                   {formatDateLong(openScreening.date)}
                 </p>
@@ -219,10 +237,20 @@ export function ScreeningCalendar({
               </div>
             </div>
 
-            {openScreening.synopsis && (
-              <p className="mt-4 border-t border-line pt-3 text-sm leading-relaxed text-ink-soft">
-                {openScreening.synopsis}
-              </p>
+            {openPending ? (
+              <Link
+                href="/votaciones"
+                onClick={() => setOpenDate(null)}
+                className="mt-4 block rounded-xl bg-indigo px-4 py-2.5 text-center text-sm font-bold text-white transition-transform active:scale-95"
+              >
+                🗳️ Vota la película de este día →
+              </Link>
+            ) : (
+              openScreening.synopsis && (
+                <p className="mt-4 border-t border-line pt-3 text-sm leading-relaxed text-ink-soft">
+                  {openScreening.synopsis}
+                </p>
+              )
             )}
           </div>
         </div>

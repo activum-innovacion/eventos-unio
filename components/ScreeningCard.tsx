@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import type { Screening } from "@/lib/types";
-import { Poster } from "./Poster";
+import { PENDING_POSTER, Poster } from "./Poster";
 import { ClockIcon, PinIcon } from "./icons";
 import { dateParts, formatDuration, relativeLabel } from "@/lib/format";
 
@@ -17,6 +17,10 @@ export function ScreeningCard({
   const { weekday, day, month } = dateParts(screening.date);
   const rel = relativeLabel(screening.date, now);
   const isPast = rel === "Ya proyectada" || rel === "Ayer";
+  const isPending = !!screening.pendingVote;
+  const title = isPending
+    ? screening.title?.trim() || "Pendiente de votación"
+    : screening.title;
 
   const badgeClass = isPast
     ? "bg-cream text-muted"
@@ -45,36 +49,48 @@ export function ScreeningCard({
         </div>
 
         <Poster
-          poster={screening.poster}
-          imageUrl={screening.imageUrl}
-          title={screening.title}
+          poster={isPending ? PENDING_POSTER : screening.poster}
+          imageUrl={isPending ? undefined : screening.imageUrl}
+          title={title}
           className="h-[4.5rem] w-14"
           size="sm"
         />
 
         <div className="min-w-0 flex-1">
           <div className="flex items-start justify-between gap-2">
-            <h3 className="truncate text-base font-bold text-ink">
-              {screening.title}
-            </h3>
+            <h3 className="truncate text-base font-bold text-ink">{title}</h3>
             <span
               className={`shrink-0 rounded-full px-2 py-0.5 text-[0.62rem] font-semibold ${badgeClass}`}
             >
               {rel}
             </span>
           </div>
-          <p className="mt-0.5 truncate text-xs text-muted">
-            {screening.genre} · {screening.year}
-          </p>
+
+          {isPending ? (
+            <p className="mt-0.5 truncate text-xs font-semibold text-indigo">
+              🗳️ Se decide por votación
+            </p>
+          ) : (
+            <p className="mt-0.5 truncate text-xs text-muted">
+              {screening.genre} · {screening.year}
+            </p>
+          )}
+
           <div className="mt-2 flex flex-wrap items-center gap-x-3 gap-y-1 text-xs">
             <span className="inline-flex items-center gap-1 font-bold text-ink">
               <ClockIcon className="h-3.5 w-3.5 text-indigo" />
               {screening.time}
             </span>
-            <span className="text-muted">{formatDuration(screening.duration)}</span>
-            <span className="rounded border border-line px-1.5 py-px text-[0.6rem] text-muted">
-              {screening.rating}
-            </span>
+            {!isPending && (
+              <>
+                <span className="text-muted">
+                  {formatDuration(screening.duration)}
+                </span>
+                <span className="rounded border border-line px-1.5 py-px text-[0.6rem] text-muted">
+                  {screening.rating}
+                </span>
+              </>
+            )}
           </div>
         </div>
       </div>
@@ -86,7 +102,9 @@ export function ScreeningCard({
       >
         <div className="overflow-hidden">
           <p className="text-sm leading-relaxed text-ink-soft">
-            {screening.synopsis}
+            {isPending
+              ? "La película de este día se elige por votación. Entra en Votaciones y vota tu favorita."
+              : screening.synopsis}
           </p>
           <p className="mt-2 inline-flex items-center gap-1 text-xs text-muted">
             <PinIcon className="h-3.5 w-3.5 text-indigo" />

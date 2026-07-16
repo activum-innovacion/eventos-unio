@@ -19,6 +19,8 @@ export type Screening = {
   poster: Poster;
   /** URL de la imagen/cartel de la película (subida desde el panel) */
   imageUrl?: string;
+  /** Si true, el día está reservado pero la película se decide por votación */
+  pendingVote?: boolean;
   /** Date in YYYY-MM-DD (local) */
   date: string;
   /** Time in HH:mm (24h) */
@@ -69,6 +71,7 @@ export type ScreeningInput = {
   time: string;
   location: string;
   imageUrl?: string;
+  pendingVote?: boolean;
 };
 
 export type NewCandidateInput = {

@@ -16,10 +16,13 @@ function parseScreening(data: Record<string, unknown>):
   const location = str(data.location) || "Azotea comunitaria";
   const rating = str(data.rating) || "TP";
   const imageUrl = str(data.imageUrl) || undefined;
+  const pendingVote = Boolean(data.pendingVote);
   const year = Number(data.year) || new Date().getFullYear();
   const duration = Number(data.duration) || 0;
 
-  if (title.length < 2) return { ok: false, error: "El título es obligatorio." };
+  // El título solo es obligatorio si NO está pendiente de votación.
+  if (!pendingVote && title.length < 2)
+    return { ok: false, error: "El título es obligatorio." };
   if (!/^\d{4}-\d{2}-\d{2}$/.test(date))
     return { ok: false, error: "Fecha no válida (usa el selector)." };
   if (!/^\d{2}:\d{2}$/.test(time))
@@ -38,6 +41,7 @@ function parseScreening(data: Record<string, unknown>):
       time,
       location,
       imageUrl,
+      pendingVote,
     },
   };
 }

@@ -49,6 +49,7 @@ export function ScreeningForm({
   const [imageUrl, setImageUrl] = useState<string | undefined>(
     initial?.imageUrl
   );
+  const [pendingVote, setPendingVote] = useState(initial?.pendingVote ?? false);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -67,6 +68,7 @@ export function ScreeningForm({
       location,
       synopsis,
       imageUrl: imageUrl ?? "",
+      pendingVote,
     };
     const url = initial
       ? `/api/admin/screenings/${initial.id}`
@@ -100,43 +102,62 @@ export function ScreeningForm({
         {initial ? "Editar sesión" : "Nueva sesión"}
       </h3>
 
-      <div>
-        <label className={label}>Título *</label>
+      <label className="flex cursor-pointer items-start gap-2.5 rounded-lg border border-line bg-cream px-3 py-2.5 text-sm text-ink">
         <input
-          className={input}
-          value={title}
-          onChange={(e) => setTitle(e.target.value)}
-          placeholder="Ej. Coco"
-          required
+          type="checkbox"
+          checked={pendingVote}
+          onChange={(e) => setPendingVote(e.target.checked)}
+          className="mt-0.5 h-4 w-4 accent-indigo"
         />
-      </div>
+        <span>
+          🗳️ Pendiente de votación
+          <span className="mt-0.5 block text-xs font-normal text-muted">
+            Reserva el día y la hora; la película se decidirá por los votos de
+            los residentes.
+          </span>
+        </span>
+      </label>
 
-      <div className="flex gap-3">
-        <div className="w-24">
-          <label className={label}>Año</label>
-          <input
-            className={input}
-            type="number"
-            value={year}
-            onChange={(e) => setYear(e.target.value)}
-            placeholder="2017"
-          />
-        </div>
-        <div className="flex-1">
-          <label className={label}>Género</label>
-          <select
-            className={input}
-            value={genre}
-            onChange={(e) => setGenre(e.target.value)}
-          >
-            {[...new Set([genre, ...GENRES])].map((g) => (
-              <option key={g} value={g}>
-                {g}
-              </option>
-            ))}
-          </select>
-        </div>
-      </div>
+      {!pendingVote && (
+        <>
+          <div>
+            <label className={label}>Título *</label>
+            <input
+              className={input}
+              value={title}
+              onChange={(e) => setTitle(e.target.value)}
+              placeholder="Ej. Coco"
+            />
+          </div>
+
+          <div className="flex gap-3">
+            <div className="w-24">
+              <label className={label}>Año</label>
+              <input
+                className={input}
+                type="number"
+                value={year}
+                onChange={(e) => setYear(e.target.value)}
+                placeholder="2017"
+              />
+            </div>
+            <div className="flex-1">
+              <label className={label}>Género</label>
+              <select
+                className={input}
+                value={genre}
+                onChange={(e) => setGenre(e.target.value)}
+              >
+                {[...new Set([genre, ...GENRES])].map((g) => (
+                  <option key={g} value={g}>
+                    {g}
+                  </option>
+                ))}
+              </select>
+            </div>
+          </div>
+        </>
+      )}
 
       <div className="flex gap-3">
         <div className="flex-1">
@@ -161,56 +182,63 @@ export function ScreeningForm({
         </div>
       </div>
 
-      <div className="flex gap-3">
-        <div className="w-28">
-          <label className={label}>Duración (min)</label>
-          <input
-            className={input}
-            type="number"
-            value={duration}
-            onChange={(e) => setDuration(e.target.value)}
-            placeholder="105"
-          />
+      {!pendingVote && (
+        <div className="flex gap-3">
+          <div className="w-28">
+            <label className={label}>Duración (min)</label>
+            <input
+              className={input}
+              type="number"
+              value={duration}
+              onChange={(e) => setDuration(e.target.value)}
+              placeholder="105"
+            />
+          </div>
+          <div className="w-28">
+            <label className={label}>Clasificación</label>
+            <select
+              className={input}
+              value={rating}
+              onChange={(e) => setRating(e.target.value)}
+            >
+              {RATINGS.map((r) => (
+                <option key={r} value={r}>
+                  {r}
+                </option>
+              ))}
+            </select>
+          </div>
         </div>
-        <div className="w-28">
-          <label className={label}>Clasificación</label>
-          <select
-            className={input}
-            value={rating}
-            onChange={(e) => setRating(e.target.value)}
-          >
-            {RATINGS.map((r) => (
-              <option key={r} value={r}>
-                {r}
-              </option>
-            ))}
-          </select>
-        </div>
-        <div className="flex-1">
-          <label className={label}>Ubicación</label>
-          <input
-            className={input}
-            value={location}
-            onChange={(e) => setLocation(e.target.value)}
-          />
-        </div>
-      </div>
+      )}
 
       <div>
-        <label className={label}>Sinopsis</label>
-        <textarea
-          className={`${input} resize-none`}
-          rows={3}
-          value={synopsis}
-          onChange={(e) => setSynopsis(e.target.value)}
-          placeholder="Breve descripción de la película…"
+        <label className={label}>Ubicación</label>
+        <input
+          className={input}
+          value={location}
+          onChange={(e) => setLocation(e.target.value)}
         />
       </div>
 
-      <div>
-        <label className={label}>Cartel / imagen</label>
-        <ImageUpload value={imageUrl} onChange={setImageUrl} />
-      </div>
+      {!pendingVote && (
+        <>
+          <div>
+            <label className={label}>Sinopsis</label>
+            <textarea
+              className={`${input} resize-none`}
+              rows={3}
+              value={synopsis}
+              onChange={(e) => setSynopsis(e.target.value)}
+              placeholder="Breve descripción de la película…"
+            />
+          </div>
+
+          <div>
+            <label className={label}>Cartel / imagen</label>
+            <ImageUpload value={imageUrl} onChange={setImageUrl} />
+          </div>
+        </>
+      )}
 
       {error && <p className="text-sm text-coral">{error}</p>}
 

@@ -49,10 +49,13 @@ async function migrate(): Promise<void> {
     synopsis text,
     poster text NOT NULL,
     image_url text,
+    pending_vote boolean NOT NULL DEFAULT false,
     date text NOT NULL,
     time text NOT NULL,
     location text
   )`;
+  // Para BDs ya creadas sin la columna:
+  await sql`ALTER TABLE screenings ADD COLUMN IF NOT EXISTS pending_vote boolean NOT NULL DEFAULT false`;
   await sql`CREATE TABLE IF NOT EXISTS candidates (
     id text PRIMARY KEY,
     title text NOT NULL,
@@ -115,6 +118,7 @@ function rowToScreening(r: Row): Screening {
     synopsis: r.synopsis as string,
     poster: JSON.parse(r.poster as string) as Poster,
     imageUrl: (r.image_url as string | null) ?? undefined,
+    pendingVote: (r.pending_vote as boolean | null) ?? false,
     date: r.date as string,
     time: r.time as string,
     location: r.location as string,
@@ -157,10 +161,11 @@ export async function addScreening(input: ScreeningInput): Promise<Screening> {
   const id = genId("scr", input.title);
   const poster: Poster = { emoji: "🎬", ...pickPalette() };
   const rows = (await sql`INSERT INTO screenings
-    (id,title,year,genre,duration,rating,synopsis,poster,image_url,date,time,location)
+    (id,title,year,genre,duration,rating,synopsis,poster,image_url,pending_vote,date,time,location)
     VALUES (${id},${input.title},${input.year},${input.genre},${input.duration},
       ${input.rating},${input.synopsis},${JSON.stringify(poster)},
-      ${input.imageUrl ?? null},${input.date},${input.time},${input.location})
+      ${input.imageUrl ?? null},${input.pendingVote ?? false},
+      ${input.date},${input.time},${input.location})
     RETURNING *`) as Row[];
   return rowToScreening(rows[0]);
 }
@@ -177,6 +182,7 @@ export async function updateScreening(
   const rows = (await sql`UPDATE screenings SET
       title=${s.title}, year=${s.year}, genre=${s.genre}, duration=${s.duration},
       rating=${s.rating}, synopsis=${s.synopsis}, image_url=${s.imageUrl ?? null},
+      pending_vote=${s.pendingVote ?? false},
       date=${s.date}, time=${s.time}, location=${s.location}
     WHERE id=${id} RETURNING *`) as Row[];
   return rowToScreening(rows[0]);

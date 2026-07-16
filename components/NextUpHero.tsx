@@ -1,5 +1,6 @@
+import Link from "next/link";
 import type { Screening } from "@/lib/types";
-import { Poster } from "./Poster";
+import { PENDING_POSTER, Poster } from "./Poster";
 import { ClockIcon, PinIcon } from "./icons";
 import { daysUntil, formatDateLong, formatDuration, relativeLabel } from "@/lib/format";
 
@@ -12,6 +13,10 @@ export function NextUpHero({
 }) {
   const rel = relativeLabel(screening.date, now);
   const days = daysUntil(screening.date, now);
+  const isPending = !!screening.pendingVote;
+  const title = isPending
+    ? screening.title?.trim() || "Pendiente de votación"
+    : screening.title;
 
   return (
     <section className="animate-in overflow-hidden rounded-2xl border border-indigo/25 bg-card shadow-md">
@@ -30,20 +35,26 @@ export function NextUpHero({
 
       <div className="flex gap-4 p-4">
         <Poster
-          poster={screening.poster}
-          imageUrl={screening.imageUrl}
-          title={screening.title}
+          poster={isPending ? PENDING_POSTER : screening.poster}
+          imageUrl={isPending ? undefined : screening.imageUrl}
+          title={title}
           className="h-36 w-24 shadow-sm"
           size="lg"
         />
         <div className="flex min-w-0 flex-1 flex-col">
           <h2 className="text-xl font-extrabold leading-tight text-ink">
-            {screening.title}
+            {title}
           </h2>
-          <p className="mt-0.5 text-xs text-muted">
-            {screening.genre} · {screening.year} ·{" "}
-            {formatDuration(screening.duration)}
-          </p>
+          {isPending ? (
+            <p className="mt-0.5 text-xs font-semibold text-indigo">
+              🗳️ Se decide por votación
+            </p>
+          ) : (
+            <p className="mt-0.5 text-xs text-muted">
+              {screening.genre} · {screening.year} ·{" "}
+              {formatDuration(screening.duration)}
+            </p>
+          )}
 
           <p className="mt-2 text-sm font-semibold text-ink">
             {formatDateLong(screening.date)}
@@ -62,11 +73,20 @@ export function NextUpHero({
         </div>
       </div>
 
-      {days > 0 && (
-        <div className="border-t border-line bg-cream px-4 py-2 text-center text-xs text-muted">
-          Faltan <span className="font-bold text-indigo">{days}</span>{" "}
-          {days === 1 ? "día" : "días"} para la sesión
-        </div>
+      {isPending ? (
+        <Link
+          href="/votaciones"
+          className="block border-t border-line bg-indigo/[0.06] px-4 py-2.5 text-center text-sm font-bold text-indigo transition-colors hover:bg-indigo/10"
+        >
+          🗳️ Vota la película de este día →
+        </Link>
+      ) : (
+        days > 0 && (
+          <div className="border-t border-line bg-cream px-4 py-2 text-center text-xs text-muted">
+            Faltan <span className="font-bold text-indigo">{days}</span>{" "}
+            {days === 1 ? "día" : "días"} para la sesión
+          </div>
+        )
       )}
     </section>
   );

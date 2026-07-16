@@ -1,5 +1,12 @@
 import type { Poster as PosterType } from "@/lib/types";
 
+/** Placeholder para sesiones pendientes de votación (película por decidir). */
+export const PENDING_POSTER: PosterType = {
+  emoji: "🗳️",
+  from: "#4d4787",
+  to: "#9cafb0",
+};
+
 type Props = {
   poster: PosterType;
   imageUrl?: string;

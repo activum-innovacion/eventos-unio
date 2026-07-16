@@ -33,6 +33,7 @@ export async function PATCH(
   if (str(data.date) !== undefined) patch.date = str(data.date);
   if (str(data.time) !== undefined) patch.time = str(data.time);
   if ("imageUrl" in data) patch.imageUrl = str(data.imageUrl) || undefined;
+  if ("pendingVote" in data) patch.pendingVote = Boolean(data.pendingVote);
   if (data.year !== undefined && data.year !== "") patch.year = Number(data.year);
   if (data.duration !== undefined && data.duration !== "")
     patch.duration = Number(data.duration);

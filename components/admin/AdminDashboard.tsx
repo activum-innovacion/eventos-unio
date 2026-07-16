@@ -5,7 +5,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import type { CandidateView, Screening } from "@/lib/types";
-import { Poster } from "@/components/Poster";
+import { PENDING_POSTER, Poster } from "@/components/Poster";
 import { formatDateLong } from "@/lib/format";
 import { ScreeningForm } from "./ScreeningForm";
 import { CandidateForm } from "./CandidateForm";
@@ -182,18 +182,28 @@ export function AdminDashboard() {
                   className="flex items-center gap-3 rounded-xl border border-line bg-card p-2.5 shadow-sm"
                 >
                   <Poster
-                    poster={s.poster}
-                    imageUrl={s.imageUrl}
+                    poster={s.pendingVote ? PENDING_POSTER : s.poster}
+                    imageUrl={s.pendingVote ? undefined : s.imageUrl}
                     title={s.title}
                     className="h-16 w-12"
                     size="sm"
                   />
                   <div className="min-w-0 flex-1">
-                    <p className="truncate font-bold text-ink">{s.title}</p>
+                    <p className="truncate font-bold text-ink">
+                      {s.pendingVote
+                        ? s.title?.trim() || "Pendiente de votación"
+                        : s.title}
+                    </p>
                     <p className="text-xs text-muted">
                       {formatDateLong(s.date)} · {s.time} h
                     </p>
-                    <p className="truncate text-xs text-muted">{s.genre}</p>
+                    {s.pendingVote ? (
+                      <p className="truncate text-xs font-semibold text-indigo">
+                        🗳️ Pendiente de votación
+                      </p>
+                    ) : (
+                      <p className="truncate text-xs text-muted">{s.genre}</p>
+                    )}
                   </div>
                   <RowActions
                     onEdit={() => {
