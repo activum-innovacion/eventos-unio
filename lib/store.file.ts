@@ -245,3 +245,24 @@ export async function toggleVote(
     return { id: candidateId, votes: voters.length, hasVoted: idx < 0 };
   });
 }
+
+// --- Meta (clave/valor) + reinicio de votos ---
+
+export async function getMeta(key: string): Promise<string | null> {
+  const db = await readDb();
+  return db.meta?.[key] ?? null;
+}
+
+export async function setMeta(key: string, value: string): Promise<void> {
+  await withLock(async (db) => {
+    db.meta = { ...(db.meta ?? {}), [key]: value };
+    await writeDb(db);
+  });
+}
+
+export async function clearAllVotes(): Promise<void> {
+  await withLock(async (db) => {
+    db.votes = {};
+    await writeDb(db);
+  });
+}

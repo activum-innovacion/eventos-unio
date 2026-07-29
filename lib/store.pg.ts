@@ -73,6 +73,10 @@ async function migrate(): Promise<void> {
     device_id text NOT NULL,
     PRIMARY KEY (candidate_id, device_id)
   )`;
+  await sql`CREATE TABLE IF NOT EXISTS meta (
+    key text PRIMARY KEY,
+    value text NOT NULL
+  )`;
   const counts = (await sql`SELECT
       (SELECT COUNT(*) FROM screenings)::int AS s,
       (SELECT COUNT(*) FROM candidates)::int AS c`) as Row[];
@@ -308,4 +312,23 @@ export async function toggleVote(
   }
   const votes = await countVotes(candidateId);
   return { id: candidateId, votes, hasVoted };
+}
+
+// --- Meta (clave/valor) + reinicio de votos ---
+
+export async function getMeta(key: string): Promise<string | null> {
+  await ensureReady();
+  const rows = (await db()`SELECT value FROM meta WHERE key=${key}`) as Row[];
+  return rows.length ? (rows[0].value as string) : null;
+}
+
+export async function setMeta(key: string, value: string): Promise<void> {
+  await ensureReady();
+  await db()`INSERT INTO meta (key, value) VALUES (${key}, ${value})
+    ON CONFLICT (key) DO UPDATE SET value = EXCLUDED.value`;
+}
+
+export async function clearAllVotes(): Promise<void> {
+  await ensureReady();
+  await db()`DELETE FROM votes`;
 }

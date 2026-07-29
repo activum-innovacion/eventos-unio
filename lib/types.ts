@@ -56,6 +56,8 @@ export type DB = {
   candidates: Candidate[];
   /** candidateId -> list of deviceIds that voted for it */
   votes: Record<string, string[]>;
+  /** clave -> valor (p. ej. la ronda para la que ya se reiniciaron los votos) */
+  meta?: Record<string, string>;
 };
 
 // --- Entradas de la capa de datos (compartidas por los backends) ---

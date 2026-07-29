@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { getScreenings, toggleVote } from "@/lib/store";
+import { getScreenings, syncVotesForRound, toggleVote } from "@/lib/store";
 import { votingStatus } from "@/lib/voting";
 
 export const dynamic = "force-dynamic";
@@ -25,8 +25,11 @@ export async function POST(
     );
   }
 
+  const screenings = await getScreenings();
+  // Si empezó una nueva ronda, reinicia los votos antes de nada.
+  await syncVotesForRound(screenings);
   // La votación se cierra 3 días antes de la próxima sesión pendiente.
-  if (!votingStatus(await getScreenings()).open) {
+  if (!votingStatus(screenings).open) {
     return NextResponse.json(
       { error: "La votación está cerrada." },
       { status: 403 }
