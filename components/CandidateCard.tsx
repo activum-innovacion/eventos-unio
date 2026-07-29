@@ -4,6 +4,7 @@ import { useState } from "react";
 import type { CandidateView } from "@/lib/types";
 import { Poster } from "./Poster";
 import { HeartIcon } from "./icons";
+import { useLang } from "@/lib/i18n";
 
 export function CandidateCard({
   candidate,
@@ -18,6 +19,7 @@ export function CandidateCard({
   votingClosed?: boolean;
   onVote: (id: string) => void;
 }) {
+  const { t } = useLang();
   const [expanded, setExpanded] = useState(false);
 
   return (
@@ -49,7 +51,7 @@ export function CandidateCard({
           </p>
           {candidate.proposedBy && (
             <span className="mt-1 inline-flex items-center gap-1 rounded-full bg-indigo/10 px-2 py-0.5 text-[0.62rem] font-semibold text-indigo-ink">
-              Propuesta por {candidate.proposedBy}
+              {t.proposedBy(candidate.proposedBy)}
             </span>
           )}
           {candidate.synopsis && (
@@ -71,10 +73,10 @@ export function CandidateCard({
           aria-pressed={candidate.hasVoted}
           aria-label={
             votingClosed
-              ? "Votación cerrada"
+              ? t.votingClosedAria
               : candidate.hasVoted
-                ? `Quitar voto de ${candidate.title}`
-                : `Votar por ${candidate.title}`
+                ? t.removeVote(candidate.title)
+                : t.voteFor(candidate.title)
           }
           className={`flex w-14 shrink-0 flex-col items-center justify-center gap-1 rounded-xl border py-2 transition-all active:scale-95 disabled:cursor-not-allowed disabled:opacity-60 ${
             candidate.hasVoted

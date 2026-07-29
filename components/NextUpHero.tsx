@@ -1,8 +1,11 @@
+"use client";
+
 import Link from "next/link";
 import type { Screening } from "@/lib/types";
 import { Poster } from "./Poster";
 import { ClockIcon, PinIcon } from "./icons";
 import { daysUntil, formatDateLong, formatDuration, relativeLabel } from "@/lib/format";
+import { useLang } from "@/lib/i18n";
 
 export function NextUpHero({
   screening,
@@ -11,11 +14,12 @@ export function NextUpHero({
   screening: Screening;
   now: Date;
 }) {
-  const rel = relativeLabel(screening.date, now);
+  const { lang, t } = useLang();
+  const rel = relativeLabel(screening.date, now, lang);
   const days = daysUntil(screening.date, now);
   const isPending = !!screening.pendingVote;
   const title = isPending
-    ? screening.title?.trim() || "Pendiente de votación"
+    ? screening.title?.trim() || t.pendingTitle
     : screening.title;
 
   return (
@@ -26,7 +30,7 @@ export function NextUpHero({
             <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-indigo opacity-75" />
             <span className="relative inline-flex h-2 w-2 rounded-full bg-indigo" />
           </span>
-          Próxima proyección
+          {t.nextScreening}
         </span>
         <span className="rounded-full bg-indigo px-2.5 py-1 text-xs font-bold text-white">
           {rel}
@@ -48,7 +52,7 @@ export function NextUpHero({
           </h2>
           {isPending ? (
             <p className="mt-0.5 text-xs font-semibold text-indigo">
-              🗳️ Se decide por votación
+              🗳️ {t.decidedByVote}
             </p>
           ) : (
             <p className="mt-0.5 text-xs text-muted">
@@ -58,7 +62,7 @@ export function NextUpHero({
           )}
 
           <p className="mt-2 text-sm font-semibold text-ink">
-            {formatDateLong(screening.date)}
+            {formatDateLong(screening.date, lang)}
           </p>
 
           <div className="mt-auto flex flex-col gap-1.5 pt-3 text-sm">
@@ -79,13 +83,12 @@ export function NextUpHero({
           href="/votaciones"
           className="block border-t border-line bg-indigo/[0.06] px-4 py-2.5 text-center text-sm font-bold text-indigo transition-colors hover:bg-indigo/10"
         >
-          🗳️ Vota la película de este día →
+          {t.voteThisDay}
         </Link>
       ) : (
         days > 0 && (
           <div className="border-t border-line bg-cream px-4 py-2 text-center text-xs text-muted">
-            Faltan <span className="font-bold text-indigo">{days}</span>{" "}
-            {days === 1 ? "día" : "días"} para la sesión
+            {t.daysUntilSession(days)}
           </div>
         )
       )}

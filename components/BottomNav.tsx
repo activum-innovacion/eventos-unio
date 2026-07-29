@@ -3,15 +3,17 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { FilmIcon, HeartIcon, HomeIcon } from "./icons";
-
-const items = [
-  { href: "/", label: "Inicio", Icon: HomeIcon },
-  { href: "/cartelera", label: "Cartelera", Icon: FilmIcon },
-  { href: "/votaciones", label: "Votaciones", Icon: HeartIcon },
-];
+import { useLang } from "@/lib/i18n";
 
 export function BottomNav() {
   const pathname = usePathname();
+  const { t } = useLang();
+
+  const items = [
+    { href: "/", label: t.navHome, Icon: HomeIcon },
+    { href: "/cartelera", label: t.navSchedule, Icon: FilmIcon },
+    { href: "/votaciones", label: t.navVote, Icon: HeartIcon },
+  ];
 
   return (
     <nav className="fixed inset-x-0 bottom-0 z-40 border-t border-line bg-card/95 backdrop-blur-md">

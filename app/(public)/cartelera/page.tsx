@@ -2,23 +2,24 @@
 
 import { ScreeningCard } from "@/components/ScreeningCard";
 import { useScreenings } from "@/lib/useScreenings";
+import { useLang } from "@/lib/i18n";
 
 export default function CarteleraPage() {
+  const { t } = useLang();
   const { screenings, error, now } = useScreenings();
 
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="brand-heading text-2xl text-ink">Cartelera</h1>
+        <h1 className="brand-heading text-2xl text-ink">{t.carteleraTitle}</h1>
         <p className="mt-1.5 text-sm leading-relaxed text-muted">
-          Toda la programación del cine de verano en la azotea. Toca una sesión
-          para ver los detalles.
+          {t.carteleraIntro}
         </p>
       </div>
 
       {error && (
         <div className="rounded-xl border border-coral/30 bg-coral/10 p-4 text-sm text-coral">
-          {error}
+          {t.errorSchedule}
         </div>
       )}
 
@@ -32,7 +33,7 @@ export default function CarteleraPage() {
 
       {screenings && screenings.length === 0 && (
         <p className="rounded-xl border border-line bg-card p-6 text-center text-sm text-muted">
-          Todavía no hay sesiones programadas.
+          {t.noSessions}
         </p>
       )}
 

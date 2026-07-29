@@ -8,12 +8,14 @@ import { getDeviceId } from "@/lib/deviceId";
 import { useScreenings } from "@/lib/useScreenings";
 import { votingStatus } from "@/lib/voting";
 import { formatDateLong } from "@/lib/format";
+import { useLang } from "@/lib/i18n";
 
 type VoteResp = { id: string; votes: number; hasVoted: boolean };
 
 export default function VotacionesPage() {
+  const { lang, t } = useLang();
   const [candidates, setCandidates] = useState<CandidateView[] | null>(null);
-  const [error, setError] = useState<string | null>(null);
+  const [error, setError] = useState(false);
   const [pending, setPending] = useState<Set<string>>(new Set());
   const deviceId = useRef<string>("");
 
@@ -30,7 +32,7 @@ export default function VotacionesPage() {
     fetch(`/api/candidates?deviceId=${encodeURIComponent(deviceId.current)}`)
       .then((r) => r.json())
       .then((d) => alive && setCandidates(d.candidates ?? []))
-      .catch(() => alive && setError("No se pudieron cargar las votaciones."));
+      .catch(() => alive && setError(true));
     return () => {
       alive = false;
     };
@@ -104,52 +106,47 @@ export default function VotacionesPage() {
       <section>
         <div className="flex items-center gap-2">
           <TrophyIcon className="h-5 w-5 text-indigo" />
-          <h1 className="brand-heading text-2xl text-ink">Votaciones</h1>
+          <h1 className="brand-heading text-2xl text-ink">{t.votingTitle}</h1>
         </div>
         <p className="mt-1.5 text-sm leading-relaxed text-muted">
-          Vota tus películas favoritas — un voto por peli y dispositivo. La
-          votación se cierra{" "}
-          <span className="font-semibold text-ink">3 días antes</span> de cada
-          sesión pendiente de votación.
+          {t.votingIntro}
         </p>
       </section>
 
       {status?.hasPending &&
         (status.open ? (
           <div className="rounded-xl border border-indigo/25 bg-indigo/[0.06] p-3.5 text-sm leading-relaxed text-ink-soft">
-            🗳️ Puedes votar hasta el{" "}
+            🗳️ {t.voteUntil}{" "}
             <span className="font-bold text-indigo">
-              {formatDateLong(status.closeDate!)}
+              {formatDateLong(status.closeDate!, lang)}
             </span>
-            . Después se cierra la votación para la sesión del{" "}
+            . {t.thenClosesFor}{" "}
             <span className="font-semibold text-ink">
-              {formatDateLong(status.sessionDate!)}
+              {formatDateLong(status.sessionDate!, lang)}
             </span>
             .
           </div>
         ) : (
           <div className="rounded-xl border border-line bg-cream p-3.5 text-sm leading-relaxed text-ink-soft">
-            🔒{" "}
-            <span className="font-bold text-ink">Votación cerrada</span> para la
-            sesión del{" "}
+            🔒 {t.votingClosedFor}{" "}
             <span className="font-semibold text-ink">
-              {formatDateLong(status.sessionDate!)}
+              {formatDateLong(status.sessionDate!, lang)}
             </span>
-            . La película se decide con los votos ya recibidos.
+            . {t.decidedWithVotes}
           </div>
         ))}
 
       {candidates && (
         <div className="flex gap-2.5 text-center">
-          <Stat value={totalVotes} label="votos totales" />
-          <Stat value={candidates.length} label="candidatas" />
-          <Stat value={myVotes} label="tus votos" accent />
+          <Stat value={totalVotes} label={t.totalVotes} />
+          <Stat value={candidates.length} label={t.candidatesLabel} />
+          <Stat value={myVotes} label={t.yourVotes} accent />
         </div>
       )}
 
       {error && (
         <div className="rounded-xl border border-coral/30 bg-coral/10 p-4 text-sm text-coral">
-          {error}
+          {t.errorVotes}
         </div>
       )}
 
@@ -157,7 +154,7 @@ export default function VotacionesPage() {
 
       {candidates && candidates.length === 0 && (
         <p className="rounded-xl border border-line bg-card p-6 text-center text-sm text-muted">
-          Todavía no hay películas para votar. ¡Vuelve pronto!
+          {t.noMovies}
         </p>
       )}
 

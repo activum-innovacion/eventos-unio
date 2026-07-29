@@ -1,4 +1,8 @@
-/** Utilidades de formato de fechas para es-ES, evitando líos de zona horaria. */
+import type { Lang } from "./types";
+
+/** Utilidades de formato de fechas, evitando líos de zona horaria. */
+
+const LOCALE: Record<Lang, string> = { es: "es-ES", en: "en-GB" };
 
 /** Convierte "YYYY-MM-DD" en un Date local (no UTC). */
 export function parseLocalDate(dateStr: string, time = "00:00"): Date {
@@ -9,11 +13,11 @@ export function parseLocalDate(dateStr: string, time = "00:00"): Date {
 
 const cap = (s: string) => s.charAt(0).toUpperCase() + s.slice(1);
 
-/** "Viernes 3 de julio" */
-export function formatDateLong(dateStr: string): string {
+/** "Viernes 3 de julio" / "Friday 3 July" */
+export function formatDateLong(dateStr: string, lang: Lang = "es"): string {
   const d = parseLocalDate(dateStr);
   return cap(
-    d.toLocaleDateString("es-ES", {
+    d.toLocaleDateString(LOCALE[lang], {
       weekday: "long",
       day: "numeric",
       month: "long",
@@ -22,16 +26,16 @@ export function formatDateLong(dateStr: string): string {
 }
 
 /** { weekday: "vie", day: "3", month: "jul" } para la tira de fecha */
-export function dateParts(dateStr: string): {
-  weekday: string;
-  day: string;
-  month: string;
-} {
+export function dateParts(
+  dateStr: string,
+  lang: Lang = "es"
+): { weekday: string; day: string; month: string } {
   const d = parseLocalDate(dateStr);
+  const loc = LOCALE[lang];
   return {
-    weekday: cap(d.toLocaleDateString("es-ES", { weekday: "short" })).replace(".", ""),
-    day: d.toLocaleDateString("es-ES", { day: "numeric" }),
-    month: d.toLocaleDateString("es-ES", { month: "short" }).replace(".", ""),
+    weekday: cap(d.toLocaleDateString(loc, { weekday: "short" })).replace(".", ""),
+    day: d.toLocaleDateString(loc, { day: "numeric" }),
+    month: d.toLocaleDateString(loc, { month: "short" }).replace(".", ""),
   };
 }
 
@@ -43,14 +47,34 @@ export function daysUntil(dateStr: string, now = new Date()): number {
   return Math.round((t1.getTime() - t0.getTime()) / 86_400_000);
 }
 
-/** Etiqueta relativa amable: "Hoy", "Mañana", "En 3 días", "Ya proyectada". */
-export function relativeLabel(dateStr: string, now = new Date()): string {
+/** Etiqueta relativa amable: "Hoy", "Mañana", "En 3 días"… / "Today", "Tomorrow"… */
+export function relativeLabel(
+  dateStr: string,
+  now = new Date(),
+  lang: Lang = "es"
+): string {
   const diff = daysUntil(dateStr, now);
-  if (diff === 0) return "Hoy";
-  if (diff === 1) return "Mañana";
-  if (diff > 1) return `En ${diff} días`;
-  if (diff === -1) return "Ayer";
-  return "Ya proyectada";
+  const T =
+    lang === "en"
+      ? {
+          today: "Today",
+          tomorrow: "Tomorrow",
+          inDays: (n: number) => `In ${n} days`,
+          yesterday: "Yesterday",
+          past: "Already shown",
+        }
+      : {
+          today: "Hoy",
+          tomorrow: "Mañana",
+          inDays: (n: number) => `En ${n} días`,
+          yesterday: "Ayer",
+          past: "Ya proyectada",
+        };
+  if (diff === 0) return T.today;
+  if (diff === 1) return T.tomorrow;
+  if (diff > 1) return T.inDays(diff);
+  if (diff === -1) return T.yesterday;
+  return T.past;
 }
 
 /** "1h 45min" a partir de minutos. */

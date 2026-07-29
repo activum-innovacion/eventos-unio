@@ -4,7 +4,8 @@ import { useState } from "react";
 import type { Screening } from "@/lib/types";
 import { Poster } from "./Poster";
 import { ClockIcon, PinIcon } from "./icons";
-import { dateParts, formatDuration, relativeLabel } from "@/lib/format";
+import { dateParts, daysUntil, formatDuration, relativeLabel } from "@/lib/format";
+import { useLang } from "@/lib/i18n";
 
 export function ScreeningCard({
   screening,
@@ -13,18 +14,21 @@ export function ScreeningCard({
   screening: Screening;
   now: Date;
 }) {
+  const { lang, t } = useLang();
   const [open, setOpen] = useState(false);
-  const { weekday, day, month } = dateParts(screening.date);
-  const rel = relativeLabel(screening.date, now);
-  const isPast = rel === "Ya proyectada" || rel === "Ayer";
+  const { weekday, day, month } = dateParts(screening.date, lang);
+  const days = daysUntil(screening.date, now);
+  const rel = relativeLabel(screening.date, now, lang);
+  const isPast = days < 0;
+  const isToday = days === 0;
   const isPending = !!screening.pendingVote;
   const title = isPending
-    ? screening.title?.trim() || "Pendiente de votación"
+    ? screening.title?.trim() || t.pendingTitle
     : screening.title;
 
   const badgeClass = isPast
     ? "bg-cream text-muted"
-    : rel === "Hoy"
+    : isToday
       ? "bg-indigo text-white"
       : "bg-indigo/10 text-indigo-ink";
 
@@ -69,7 +73,7 @@ export function ScreeningCard({
 
           {isPending ? (
             <p className="mt-0.5 truncate text-xs font-semibold text-indigo">
-              🗳️ Se decide por votación
+              🗳️ {t.decidedByVote}
             </p>
           ) : (
             <p className="mt-0.5 truncate text-xs text-muted">
@@ -103,9 +107,7 @@ export function ScreeningCard({
       >
         <div className="overflow-hidden">
           <p className="text-sm leading-relaxed text-ink-soft">
-            {isPending
-              ? "La película de este día se elige por votación. Entra en Votaciones y vota tu favorita."
-              : screening.synopsis}
+            {isPending ? t.pendingExpanded : screening.synopsis}
           </p>
           <p className="mt-2 inline-flex items-center gap-1 text-xs text-muted">
             <PinIcon className="h-3.5 w-3.5 text-indigo" />

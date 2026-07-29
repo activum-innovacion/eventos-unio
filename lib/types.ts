@@ -1,3 +1,5 @@
+export type Lang = "es" | "en";
+
 export type Poster = {
   /** Emoji shown large on the poster (placeholder cuando no hay imagen) */
   emoji: string;

@@ -9,10 +9,14 @@ import {
   parseLocalDate,
   relativeLabel,
 } from "@/lib/format";
+import { useLang } from "@/lib/i18n";
 import { Poster } from "./Poster";
 import { ClockIcon, PinIcon } from "./icons";
 
-const WEEKDAYS = ["L", "M", "X", "J", "V", "S", "D"];
+const WEEKDAYS = {
+  es: ["L", "M", "X", "J", "V", "S", "D"],
+  en: ["M", "T", "W", "T", "F", "S", "S"],
+};
 const pad = (n: number) => String(n).padStart(2, "0");
 const keyOf = (y: number, m: number, d: number) => `${y}-${pad(m + 1)}-${pad(d)}`;
 const cap = (s: string) => s.charAt(0).toUpperCase() + s.slice(1);
@@ -24,6 +28,9 @@ export function ScreeningCalendar({
   screenings: Screening[];
   now: Date;
 }) {
+  const { lang, t } = useLang();
+  const locale = lang === "en" ? "en-GB" : "es-ES";
+
   const byDate = useMemo(() => {
     const m = new Map<string, Screening>();
     for (const s of screenings) if (!m.has(s.date)) m.set(s.date, s);
@@ -50,7 +57,7 @@ export function ScreeningCalendar({
   const openPending = !!openScreening?.pendingVote;
   const openTitle = openScreening
     ? openPending
-      ? openScreening.title?.trim() || "Pendiente de votación"
+      ? openScreening.title?.trim() || t.pendingTitle
       : openScreening.title
     : "";
 
@@ -70,7 +77,7 @@ export function ScreeningCalendar({
   }, [openScreening]);
 
   const monthLabel = cap(
-    new Date(view.year, view.month, 1).toLocaleDateString("es-ES", {
+    new Date(view.year, view.month, 1).toLocaleDateString(locale, {
       month: "long",
       year: "numeric",
     })
@@ -96,7 +103,7 @@ export function ScreeningCalendar({
       <div className="mb-3 flex items-center justify-between">
         <button
           type="button"
-          aria-label="Mes anterior"
+          aria-label={lang === "en" ? "Previous month" : "Mes anterior"}
           onClick={() => shift(-1)}
           className="grid h-8 w-8 place-items-center rounded-lg border border-line text-ink transition-colors hover:border-indigo hover:text-indigo"
         >
@@ -105,7 +112,7 @@ export function ScreeningCalendar({
         <span className="brand-heading text-sm text-ink">{monthLabel}</span>
         <button
           type="button"
-          aria-label="Mes siguiente"
+          aria-label={lang === "en" ? "Next month" : "Mes siguiente"}
           onClick={() => shift(1)}
           className="grid h-8 w-8 place-items-center rounded-lg border border-line text-ink transition-colors hover:border-indigo hover:text-indigo"
         >
@@ -115,8 +122,8 @@ export function ScreeningCalendar({
 
       {/* Días de la semana */}
       <div className="mb-1 grid grid-cols-7 gap-1 text-center text-[0.62rem] font-bold uppercase tracking-wide text-muted">
-        {WEEKDAYS.map((w) => (
-          <div key={w}>{w}</div>
+        {WEEKDAYS[lang].map((w, i) => (
+          <div key={i}>{w}</div>
         ))}
       </div>
 
@@ -143,7 +150,15 @@ export function ScreeningCalendar({
               type="button"
               disabled={!has}
               onClick={() => setOpenDate(k)}
-              aria-label={has ? `Ver sesión del ${day}` : `${day}, sin sesión`}
+              aria-label={
+                has
+                  ? lang === "en"
+                    ? `View session on the ${day}`
+                    : `Ver sesión del ${day}`
+                  : lang === "en"
+                    ? `${day}, no session`
+                    : `${day}, sin sesión`
+              }
               className={`relative grid aspect-square place-items-center rounded-lg text-sm transition-colors disabled:cursor-default ${cls} ${
                 isToday && !isNext ? "ring-1 ring-indigo/50" : ""
               }`}
@@ -161,16 +176,14 @@ export function ScreeningCalendar({
         })}
       </div>
 
-      <p className="mt-3 text-center text-xs text-muted">
-        Toca un día marcado para ver la película.
-      </p>
+      <p className="mt-3 text-center text-xs text-muted">{t.tapMarkedDay}</p>
 
       {/* Modal de la sesión */}
       {openScreening && (
         <div
           role="dialog"
           aria-modal="true"
-          aria-label={`Sesión: ${openTitle}`}
+          aria-label={`${t.pendingTitle}: ${openTitle}`}
           onClick={() => setOpenDate(null)}
           className="fixed inset-0 z-50 flex items-center justify-center bg-ink/50 p-4 backdrop-blur-sm"
         >
@@ -181,7 +194,7 @@ export function ScreeningCalendar({
             <button
               type="button"
               onClick={() => setOpenDate(null)}
-              aria-label="Cerrar"
+              aria-label={t.close}
               className="absolute right-3 top-3 z-10 grid h-8 w-8 place-items-center rounded-full bg-cream text-ink-soft transition-colors hover:bg-line"
             >
               <svg
@@ -207,14 +220,14 @@ export function ScreeningCalendar({
               />
               <div className="min-w-0 flex-1 pr-6">
                 <span className="mb-1.5 inline-block rounded-full bg-indigo/10 px-2 py-0.5 text-[0.62rem] font-semibold text-indigo-ink">
-                  {relativeLabel(openScreening.date, now)}
+                  {relativeLabel(openScreening.date, now, lang)}
                 </span>
                 <h3 className="text-lg font-extrabold leading-tight text-ink">
                   {openTitle}
                 </h3>
                 {openPending ? (
                   <p className="mt-0.5 text-xs font-semibold text-indigo">
-                    🗳️ Se decide por votación
+                    🗳️ {t.decidedByVote}
                   </p>
                 ) : (
                   <p className="mt-0.5 text-xs text-muted">
@@ -223,7 +236,7 @@ export function ScreeningCalendar({
                   </p>
                 )}
                 <p className="mt-2 text-sm font-semibold text-ink">
-                  {formatDateLong(openScreening.date)}
+                  {formatDateLong(openScreening.date, lang)}
                 </p>
                 <div className="mt-1.5 flex flex-col gap-1 text-xs">
                   <span className="inline-flex items-center gap-1.5 font-bold text-ink">
@@ -244,7 +257,7 @@ export function ScreeningCalendar({
                 onClick={() => setOpenDate(null)}
                 className="mt-4 block rounded-xl bg-indigo px-4 py-2.5 text-center text-sm font-bold text-white transition-transform active:scale-95"
               >
-                🗳️ Vota la película de este día →
+                {t.voteThisDay}
               </Link>
             ) : (
               openScreening.synopsis && (
