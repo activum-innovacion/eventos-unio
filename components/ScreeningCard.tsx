@@ -73,7 +73,7 @@ export function ScreeningCard({
 
           {isPending ? (
             <p className="mt-0.5 truncate text-xs font-semibold text-indigo">
-              🗳️ {t.decidedByVote}
+              {t.pendingTag}
             </p>
           ) : (
             <p className="mt-0.5 truncate text-xs text-muted">

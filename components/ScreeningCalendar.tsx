@@ -1,6 +1,5 @@
 "use client";
 
-import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
 import type { Screening } from "@/lib/types";
 import {
@@ -227,7 +226,7 @@ export function ScreeningCalendar({
                 </h3>
                 {openPending ? (
                   <p className="mt-0.5 text-xs font-semibold text-indigo">
-                    🗳️ {t.decidedByVote}
+                    {t.pendingTag}
                   </p>
                 ) : (
                   <p className="mt-0.5 text-xs text-muted">
@@ -252,13 +251,9 @@ export function ScreeningCalendar({
             </div>
 
             {openPending ? (
-              <Link
-                href="/votaciones"
-                onClick={() => setOpenDate(null)}
-                className="mt-4 block rounded-xl bg-indigo px-4 py-2.5 text-center text-sm font-bold text-white transition-transform active:scale-95"
-              >
-                {t.voteThisDay}
-              </Link>
+              <p className="mt-4 border-t border-line pt-3 text-sm leading-relaxed text-ink-soft">
+                {t.pendingExpanded}
+              </p>
             ) : (
               openScreening.synopsis && (
                 <p className="mt-4 border-t border-line pt-3 text-sm leading-relaxed text-ink-soft">

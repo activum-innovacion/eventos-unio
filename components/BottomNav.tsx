@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { FilmIcon, HeartIcon, HomeIcon } from "./icons";
+import { FilmIcon, HomeIcon } from "./icons";
 import { useLang } from "@/lib/i18n";
 
 export function BottomNav() {
@@ -12,7 +12,6 @@ export function BottomNav() {
   const items = [
     { href: "/", label: t.navHome, Icon: HomeIcon },
     { href: "/cartelera", label: t.navSchedule, Icon: FilmIcon },
-    { href: "/votaciones", label: t.navVote, Icon: HeartIcon },
   ];
 
   return (

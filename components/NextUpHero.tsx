@@ -1,6 +1,5 @@
 "use client";
 
-import Link from "next/link";
 import type { Screening } from "@/lib/types";
 import { Poster } from "./Poster";
 import { ClockIcon, PinIcon } from "./icons";
@@ -52,7 +51,7 @@ export function NextUpHero({
           </h2>
           {isPending ? (
             <p className="mt-0.5 text-xs font-semibold text-indigo">
-              🗳️ {t.decidedByVote}
+              {t.pendingTag}
             </p>
           ) : (
             <p className="mt-0.5 text-xs text-muted">
@@ -78,19 +77,10 @@ export function NextUpHero({
         </div>
       </div>
 
-      {isPending ? (
-        <Link
-          href="/votaciones"
-          className="block border-t border-line bg-indigo/[0.06] px-4 py-2.5 text-center text-sm font-bold text-indigo transition-colors hover:bg-indigo/10"
-        >
-          {t.voteThisDay}
-        </Link>
-      ) : (
-        days > 0 && (
-          <div className="border-t border-line bg-cream px-4 py-2 text-center text-xs text-muted">
-            {t.daysUntilSession(days)}
-          </div>
-        )
+      {days > 0 && (
+        <div className="border-t border-line bg-cream px-4 py-2 text-center text-xs text-muted">
+          {t.daysUntilSession(days)}
+        </div>
       )}
     </section>
   );
