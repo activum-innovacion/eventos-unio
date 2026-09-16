@@ -9,6 +9,7 @@ import type {
   NewCandidateInput,
   VoteResult,
 } from "./types";
+import type { SurveyInput, SurveyResponse } from "./survey";
 import { seed } from "./seed";
 import { genId, pickPalette } from "./store-util";
 
@@ -76,6 +77,16 @@ async function migrate(): Promise<void> {
   await sql`CREATE TABLE IF NOT EXISTS meta (
     key text PRIMARY KEY,
     value text NOT NULL
+  )`;
+  await sql`CREATE TABLE IF NOT EXISTS survey_responses (
+    id text PRIMARY KEY,
+    q1 text NOT NULL,
+    q2 int,
+    q3 text NOT NULL,
+    q4 text NOT NULL DEFAULT '[]',
+    q5 text NOT NULL DEFAULT '',
+    device_id text,
+    created_at timestamptz NOT NULL DEFAULT now()
   )`;
   const counts = (await sql`SELECT
       (SELECT COUNT(*) FROM screenings)::int AS s,
@@ -331,4 +342,44 @@ export async function setMeta(key: string, value: string): Promise<void> {
 export async function clearAllVotes(): Promise<void> {
   await ensureReady();
   await db()`DELETE FROM votes`;
+}
+
+// --- Encuesta de valoración ---
+
+function rowToSurvey(r: Row): SurveyResponse {
+  const createdAt = r.created_at;
+  return {
+    id: r.id as string,
+    q1: r.q1 as string,
+    q2: (r.q2 as number | null) ?? null,
+    q3: r.q3 as string,
+    q4: JSON.parse((r.q4 as string) || "[]") as string[],
+    q5: (r.q5 as string | null) ?? "",
+    deviceId: (r.device_id as string | null) ?? undefined,
+    createdAt:
+      createdAt instanceof Date
+        ? createdAt.toISOString()
+        : String(createdAt ?? ""),
+  };
+}
+
+export async function addSurveyResponse(
+  input: SurveyInput
+): Promise<SurveyResponse> {
+  await ensureReady();
+  const sql = db();
+  const id = genId("resp", "encuesta");
+  const rows = (await sql`INSERT INTO survey_responses
+    (id, q1, q2, q3, q4, q5, device_id)
+    VALUES (${id}, ${input.q1}, ${input.q2}, ${input.q3},
+      ${JSON.stringify(input.q4)}, ${input.q5}, ${input.deviceId ?? null})
+    RETURNING *`) as Row[];
+  return rowToSurvey(rows[0]);
+}
+
+export async function getSurveyResponses(): Promise<SurveyResponse[]> {
+  await ensureReady();
+  const rows = (await db()`
+    SELECT * FROM survey_responses ORDER BY created_at DESC`) as Row[];
+  return rows.map(rowToSurvey);
 }

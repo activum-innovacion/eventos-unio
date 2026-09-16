@@ -27,6 +27,8 @@ export const {
   getMeta,
   setMeta,
   clearAllVotes,
+  addSurveyResponse,
+  getSurveyResponses,
 } = impl;
 
 const RESET_MARKER = "votes_reset_round";

@@ -22,6 +22,7 @@
 
   /* Estado */
   --color-coral: #c85b45; /* errores */
+  --color-amber: #f2b01e; /* estrellas de valoración */
 
   --font-sans: var(--font-montserrat), ui-sans-serif, system-ui, sans-serif;
   /* Nexa (marca) para titulares, con Montserrat de reserva. Forma con fallback

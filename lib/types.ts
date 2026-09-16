@@ -1,3 +1,5 @@
+import type { SurveyResponse } from "./survey";
+
 export type Lang = "es" | "en";
 
 export type Poster = {
@@ -60,6 +62,8 @@ export type DB = {
   votes: Record<string, string[]>;
   /** clave -> valor (p. ej. la ronda para la que ya se reiniciaron los votos) */
   meta?: Record<string, string>;
+  /** Respuestas de la encuesta de valoración (opcional para BDs antiguas) */
+  surveyResponses?: SurveyResponse[];
 };
 
 // --- Entradas de la capa de datos (compartidas por los backends) ---

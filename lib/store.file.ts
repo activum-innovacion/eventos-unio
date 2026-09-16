@@ -11,8 +11,9 @@ import type {
   ScreeningInput,
   VoteResult,
 } from "./types";
+import type { SurveyInput, SurveyResponse } from "./survey";
 import { seed } from "./seed";
-import { POSTER_PALETTE, slugify } from "./store-util";
+import { genId, POSTER_PALETTE, slugify } from "./store-util";
 
 /**
  * Backend de datos respaldado por un fichero JSON (desarrollo local y
@@ -265,4 +266,32 @@ export async function clearAllVotes(): Promise<void> {
     db.votes = {};
     await writeDb(db);
   });
+}
+
+// --- Encuesta de valoración ---
+
+export async function addSurveyResponse(
+  input: SurveyInput
+): Promise<SurveyResponse> {
+  return withLock((db) => {
+    const response: SurveyResponse = {
+      id: genId("resp", "encuesta"),
+      q1: input.q1,
+      q2: input.q2,
+      q3: input.q3,
+      q4: input.q4,
+      q5: input.q5,
+      deviceId: input.deviceId,
+      createdAt: new Date().toISOString(),
+    };
+    db.surveyResponses = [...(db.surveyResponses ?? []), response];
+    return writeDb(db).then(() => response);
+  });
+}
+
+export async function getSurveyResponses(): Promise<SurveyResponse[]> {
+  const db = await readDb();
+  return [...(db.surveyResponses ?? [])].sort((a, b) =>
+    b.createdAt.localeCompare(a.createdAt)
+  );
 }
