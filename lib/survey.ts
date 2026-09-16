@@ -1,5 +1,5 @@
 /**
- * Definición de la encuesta de valoración de actividades de ÜNIO.
+ * Definición de la encuesta de valoración de actividades de ÚNIO.
  * Se comparte entre el formulario público (/encuestas), la validación de la
  * API y la vista de resultados (/respuestas), para que las etiquetas y los
  * valores canónicos vivan en un único sitio.

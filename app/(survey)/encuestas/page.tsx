@@ -130,7 +130,7 @@ export default function EncuestasPage() {
             ¿Nos dejas una reseña en Google?
           </p>
           <p className="mx-auto mt-1 max-w-xs text-xs leading-relaxed text-muted">
-            Si te ha gustado tu experiencia en ÜNIO, una reseña nos ayuda
+            Si te ha gustado tu experiencia en ÚNIO, una reseña nos ayuda
             muchísimo. Solo te llevará un momento. 💜
           </p>
           <a
@@ -179,7 +179,7 @@ export default function EncuestasPage() {
           ¡Queremos conocer tu opinión! 🍿
         </h1>
         <p className="mt-1.5 text-sm leading-relaxed text-muted">
-          Ayúdanos a mejorar las actividades de ÜNIO. Solo te llevará un minuto.
+          Ayúdanos a mejorar las actividades de ÚNIO. Solo te llevará un minuto.
         </p>
       </header>
 

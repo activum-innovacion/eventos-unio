@@ -13,11 +13,11 @@ export function SiteHeader() {
         <Link
           href="/"
           className="flex min-w-0 items-center gap-2.5"
-          aria-label="ÜNIO Madrid"
+          aria-label="ÚNIO Madrid"
         >
           <Image
             src="/images/UNIO_LOGOTIPO_AZUL.png"
-            alt="ÜNIO Madrid"
+            alt="ÚNIO Madrid"
             width={112}
             height={53}
             priority

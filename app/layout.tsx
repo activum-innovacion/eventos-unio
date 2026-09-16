@@ -21,14 +21,14 @@ const nexa = localFont({
 });
 
 export const metadata: Metadata = {
-  title: "Cine de Verano · ÜNIO Madrid",
+  title: "Cine de Verano · ÚNIO Madrid",
   description:
-    "La programación del cine de verano de ÜNIO Madrid. Consulta la cartelera y vota tus películas favoritas.",
-  applicationName: "Cine de Verano ÜNIO",
+    "La programación del cine de verano de ÚNIO Madrid. Consulta la cartelera y vota tus películas favoritas.",
+  applicationName: "Cine de Verano ÚNIO",
   appleWebApp: {
     capable: true,
     statusBarStyle: "default",
-    title: "Cine ÜNIO",
+    title: "Cine ÚNIO",
   },
 };
 

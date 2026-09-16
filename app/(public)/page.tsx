@@ -19,7 +19,7 @@ export default function InicioPage() {
 
   return (
     <div className="space-y-6">
-      <h1 className="sr-only">{t.appName} · ÜNIO Madrid</h1>
+      <h1 className="sr-only">{t.appName} · ÚNIO Madrid</h1>
 
       {error && (
         <div className="rounded-xl border border-coral/30 bg-coral/10 p-4 text-sm text-coral">

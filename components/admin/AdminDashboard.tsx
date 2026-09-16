@@ -114,7 +114,7 @@ export function AdminDashboard() {
         <div className="flex items-center gap-2.5">
           <Image
             src="/images/UNIO_LOGOTIPO_AZUL.png"
-            alt="ÜNIO"
+            alt="ÚNIO"
             width={100}
             height={47}
             className="h-6 w-auto"

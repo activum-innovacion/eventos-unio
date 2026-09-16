@@ -41,7 +41,7 @@ export default function AdminLoginPage() {
         <div className="mb-8 flex flex-col items-center gap-3 text-center">
           <Image
             src="/images/UNIO_LOGOTIPO_AZUL.png"
-            alt="ÜNIO Madrid"
+            alt="ÚNIO Madrid"
             width={140}
             height={66}
             priority
@@ -50,7 +50,7 @@ export default function AdminLoginPage() {
           <h1 className="brand-heading text-lg text-ink">
             Panel de administración
           </h1>
-          <p className="text-xs text-muted">Cine de Verano · ÜNIO Madrid</p>
+          <p className="text-xs text-muted">Cine de Verano · ÚNIO Madrid</p>
         </div>
 
         <form onSubmit={handleSubmit} className="space-y-3">

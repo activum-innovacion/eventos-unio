@@ -6,7 +6,7 @@ type Props = {
   title?: string;
   className?: string;
   size?: "sm" | "md" | "lg";
-  /** Sesión pendiente de votación → placeholder con el isologo de ÜNIO */
+  /** Sesión pendiente de votación → placeholder con el isologo de ÚNIO */
   pending?: boolean;
 };
 
@@ -25,7 +25,7 @@ const filmStrip = (
 
 /**
  * Cartel de la película.
- *  - pending → placeholder de marca (isologo ÜNIO sobre índigo)
+ *  - pending → placeholder de marca (isologo ÚNIO sobre índigo)
  *  - imageUrl → imagen subida desde el panel
  *  - si no → degradado + emoji
  */
