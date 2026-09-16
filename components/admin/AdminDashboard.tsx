@@ -122,6 +122,23 @@ export function AdminDashboard() {
           <span className="brand-heading text-sm text-indigo">Panel</span>
         </div>
         <div className="flex items-center gap-3 text-xs font-semibold">
+          <Link
+            href="/respuestas"
+            className="inline-flex items-center gap-1 text-muted hover:text-indigo"
+          >
+            <svg
+              viewBox="0 0 24 24"
+              className="h-3.5 w-3.5"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth={2}
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            >
+              <path d="M4 20h16M8 20v-6M12 20v-10M16 20v-4" />
+            </svg>
+            Respuestas
+          </Link>
           <Link href="/" className="text-muted hover:text-indigo">
             Ver web ↗
           </Link>
