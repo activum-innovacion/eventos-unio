@@ -29,6 +29,7 @@ export const {
   clearAllVotes,
   addSurveyResponse,
   getSurveyResponses,
+  deleteSurveyResponse,
 } = impl;
 
 const RESET_MARKER = "votes_reset_round";

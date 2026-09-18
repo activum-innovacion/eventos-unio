@@ -4,6 +4,7 @@ import { isAdmin } from "@/lib/auth";
 import { getSurveyResponses } from "@/lib/store";
 import { summarize, Q2_LABELS, type Tally } from "@/lib/survey";
 import { ExportCsvButton } from "@/components/survey/ExportCsvButton";
+import { ResponsesLog } from "@/components/survey/ResponsesLog";
 
 export const dynamic = "force-dynamic";
 
@@ -112,6 +113,22 @@ export default async function RespuestasPage() {
               </ul>
             )}
           </Block>
+
+          <section className="rounded-2xl border border-line bg-card p-4 shadow-sm">
+            <div className="mb-1 flex items-center justify-between gap-2">
+              <h2 className="text-sm font-bold text-ink">
+                Registro de respuestas
+              </h2>
+              <span className="text-xs text-muted">
+                {s.total} en total
+              </span>
+            </div>
+            <p className="mb-3 text-xs leading-relaxed text-muted">
+              Cada envío individual con su fecha y hora (Madrid). Puedes borrar
+              respuestas de prueba o erróneas.
+            </p>
+            <ResponsesLog responses={responses} />
+          </section>
         </>
       )}
 

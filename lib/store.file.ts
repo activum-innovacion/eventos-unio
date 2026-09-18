@@ -295,3 +295,14 @@ export async function getSurveyResponses(): Promise<SurveyResponse[]> {
     b.createdAt.localeCompare(a.createdAt)
   );
 }
+
+export async function deleteSurveyResponse(id: string): Promise<boolean> {
+  return withLock(async (db) => {
+    const list = db.surveyResponses ?? [];
+    const next = list.filter((r) => r.id !== id);
+    if (next.length === list.length) return false;
+    db.surveyResponses = next;
+    await writeDb(db);
+    return true;
+  });
+}

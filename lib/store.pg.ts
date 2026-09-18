@@ -383,3 +383,10 @@ export async function getSurveyResponses(): Promise<SurveyResponse[]> {
     SELECT * FROM survey_responses ORDER BY created_at DESC`) as Row[];
   return rows.map(rowToSurvey);
 }
+
+export async function deleteSurveyResponse(id: string): Promise<boolean> {
+  await ensureReady();
+  const rows = (await db()`DELETE FROM survey_responses WHERE id=${id}
+    RETURNING id`) as Row[];
+  return rows.length > 0;
+}
